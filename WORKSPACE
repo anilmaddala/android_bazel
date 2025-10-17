@@ -18,11 +18,11 @@ android_sdk_repository(
     api_level = 35,
 )
 
-# Kotlin rules - Using v2.0.0 with correct Compose plugin config
+# Kotlin rules - Using v2.1.0 for Kotlin 2.1.x support
 http_archive(
     name = "rules_kotlin",
-    sha256 = "d89723cc9ebbb7bdb2ebaca1af7d2383e074615643cf97a366b758a76b7dc443",
-    urls = ["https://github.com/bazelbuild/rules_kotlin/releases/download/v2.0.0/rules_kotlin-v2.0.0.tar.gz"],
+    sha256 = "dd32f19e73c70f32ccb9a166c615c0ca4aed8e27e72c4a6330c3523eafa1aa55",
+    urls = ["https://github.com/bazelbuild/rules_kotlin/releases/download/v2.1.0/rules_kotlin-v2.1.0.tar.gz"],
 )
 
 load("@rules_kotlin//kotlin:repositories.bzl", "kotlin_repositories")
@@ -43,12 +43,12 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 
 maven_install(
     artifacts = [
-        # Kotlin stdlib - 2.0.0 (matching rules_kotlin 2.0.0)
-        "org.jetbrains.kotlin:kotlin-stdlib:2.0.0",
-        "org.jetbrains.kotlin:kotlin-stdlib-common:2.0.0",
+        # Kotlin stdlib - 2.1.0 (matching rules_kotlin 2.1.0)
+        "org.jetbrains.kotlin:kotlin-stdlib:2.1.0",
+        "org.jetbrains.kotlin:kotlin-stdlib-common:2.1.0",
 
-        # Compose Compiler Embeddable Plugin - trying 2.0.0 to match rules_kotlin
-        "org.jetbrains.kotlin:kotlin-compose-compiler-plugin-embeddable:2.0.0",
+        # Compose Compiler Embeddable Plugin - 2.1.0 to match Kotlin 2.1.0
+        "org.jetbrains.kotlin:kotlin-compose-compiler-plugin-embeddable:2.1.0",
 
         # Kotlinx Coroutines
         "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0",
@@ -82,44 +82,45 @@ maven_install(
         "androidx.savedstate:savedstate:1.2.1",
         "androidx.savedstate:savedstate-ktx:1.2.1",
 
-        # Jetpack Compose - Using 1.7.6 (from BOM 2024.10.00) with explicit -android artifacts
-        # Testing compatibility with rules_kotlin v2.0.0
-        "androidx.compose.runtime:runtime:1.7.6",
-        "androidx.compose.runtime:runtime-android:1.7.6",
-        "androidx.compose.runtime:runtime-saveable:1.7.6",
-        "androidx.compose.runtime:runtime-saveable-android:1.7.6",
-        "androidx.compose.ui:ui:1.7.6",
-        "androidx.compose.ui:ui-android:1.7.6",
-        "androidx.compose.ui:ui-geometry:1.7.6",
-        "androidx.compose.ui:ui-geometry-android:1.7.6",
-        "androidx.compose.ui:ui-graphics:1.7.6",
-        "androidx.compose.ui:ui-graphics-android:1.7.6",
-        "androidx.compose.ui:ui-text:1.7.6",
-        "androidx.compose.ui:ui-text-android:1.7.6",
-        "androidx.compose.ui:ui-unit:1.7.6",
-        "androidx.compose.ui:ui-unit-android:1.7.6",
-        "androidx.compose.ui:ui-util:1.7.6",
-        "androidx.compose.ui:ui-util-android:1.7.6",
-        "androidx.compose.ui:ui-tooling-preview:1.7.6",
-        "androidx.compose.ui:ui-tooling-preview-android:1.7.6",
-        "androidx.compose.foundation:foundation:1.7.6",
-        "androidx.compose.foundation:foundation-android:1.7.6",
-        "androidx.compose.foundation:foundation-layout:1.7.6",
-        "androidx.compose.foundation:foundation-layout-android:1.7.6",
-        "androidx.compose.animation:animation:1.7.6",
-        "androidx.compose.animation:animation-android:1.7.6",
-        "androidx.compose.animation:animation-core:1.7.6",
-        "androidx.compose.animation:animation-core-android:1.7.6",
+        # Jetpack Compose - Using 1.8.1 (from BOM 2025.05.01) with explicit -android artifacts
+        # Testing compatibility with rules_kotlin v2.1.0 + Compose compiler 2.1.0
+        "androidx.compose.runtime:runtime:1.8.1",
+        "androidx.compose.runtime:runtime-android:1.8.1",
+        "androidx.compose.runtime:runtime-saveable:1.8.1",
+        "androidx.compose.runtime:runtime-saveable-android:1.8.1",
+        "androidx.compose.ui:ui:1.8.1",
+        "androidx.compose.ui:ui-android:1.8.1",
+        "androidx.compose.ui:ui-geometry:1.8.1",
+        "androidx.compose.ui:ui-geometry-android:1.8.1",
+        "androidx.compose.ui:ui-graphics:1.8.1",
+        "androidx.compose.ui:ui-graphics-android:1.8.1",
+        "androidx.compose.ui:ui-text:1.8.1",
+        "androidx.compose.ui:ui-text-android:1.8.1",
+        "androidx.compose.ui:ui-unit:1.8.1",
+        "androidx.compose.ui:ui-unit-android:1.8.1",
+        "androidx.compose.ui:ui-util:1.8.1",
+        "androidx.compose.ui:ui-util-android:1.8.1",
+        "androidx.compose.ui:ui-tooling-preview:1.8.1",
+        "androidx.compose.ui:ui-tooling-preview-android:1.8.1",
+        "androidx.compose.foundation:foundation:1.8.1",
+        "androidx.compose.foundation:foundation-android:1.8.1",
+        "androidx.compose.foundation:foundation-layout:1.8.1",
+        "androidx.compose.foundation:foundation-layout-android:1.8.1",
+        "androidx.compose.animation:animation:1.8.1",
+        "androidx.compose.animation:animation-android:1.8.1",
+        "androidx.compose.animation:animation-core:1.8.1",
+        "androidx.compose.animation:animation-core-android:1.8.1",
 
-        # Material 3 and Icons - 1.3.1 (from BOM 2024.10.00) with explicit -android artifacts
-        "androidx.compose.material3:material3:1.3.1",
-        "androidx.compose.material3:material3-android:1.3.1",
-        "androidx.compose.material:material-icons-core:1.7.6",
-        "androidx.compose.material:material-icons-core-android:1.7.6",
-        "androidx.compose.material:material-icons-extended:1.7.6",
-        "androidx.compose.material:material-icons-extended-android:1.7.6",
-        "androidx.compose.material:material-ripple:1.7.6",
-        "androidx.compose.material:material-ripple-android:1.7.6",
+        # Material 3 and Icons - from BOM 2025.05.01 with explicit -android artifacts
+        "androidx.compose.material3:material3:1.3.2",
+        "androidx.compose.material3:material3-android:1.3.2",
+        # Material Icons are at 1.7.8 for BOM 2025.05.01
+        "androidx.compose.material:material-icons-core:1.7.8",
+        "androidx.compose.material:material-icons-core-android:1.7.8",
+        "androidx.compose.material:material-icons-extended:1.7.8",
+        "androidx.compose.material:material-icons-extended-android:1.7.8",
+        "androidx.compose.material:material-ripple:1.7.8",
+        "androidx.compose.material:material-ripple-android:1.7.8",
 
         # Compose ViewModel integration - 2.8.7
         "androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7",

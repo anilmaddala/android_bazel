@@ -15,17 +15,19 @@ The Gradle build is **fully functional** with the latest dependencies:
 Build command: `./gradlew assembleDebug`
 
 ### Bazel Build ✅
-The Bazel build is **functional** with Compose BOM 2024.10.00:
-- rules_kotlin: v2.0.0
-- Compose BOM: 2024.10.00
-- Compose UI: 1.7.6
-- Material3: 1.3.1
-- Compose Compiler Plugin: 2.0.0
+The Bazel build is **fully functional** with Compose BOM 2025.05.01:
+- rules_kotlin: v2.1.0
+- Compose BOM: 2025.05.01
+- Compose UI: 1.8.1
+- Material3: 1.3.2
+- Material Icons: 1.7.8
+- Kotlin: 2.1.0
+- Compose Compiler Plugin: 2.1.0
 - compileSdk/targetSdk: 35
 
 Build command: `./bazelisk build //app:notekeeper_debug`
 
-**Note**: Cannot use Compose BOM 2025.05.01 (Compose 1.8.1) due to Compose compiler plugin version incompatibilities.
+**SUCCESS**: Both Gradle and Bazel now use the **same** Compose BOM 2025.05.01! ✅
 
 ## The Problem
 
@@ -177,15 +179,96 @@ Key Bazel dependencies:
 
 ## Final Status
 
-**Dual Build System Successfully Configured** ✅
+**Both Build Systems Successfully Use Compose BOM 2025.05.01** ✅
 
-Both Gradle and Bazel builds are now functional:
+Both Gradle and Bazel builds are now functional with the **same** Compose BOM version:
 
-- **Gradle**: Latest Compose BOM 2025.05.01 for development
-- **Bazel**: Stable Compose BOM 2024.10.00 for production builds
+- **Gradle**: Compose BOM 2025.05.01 (Compose UI 1.8.1, Kotlin 2.1.0)
+- **Bazel**: Compose BOM 2025.05.01 (Compose UI 1.8.1, Kotlin 2.1.0)
 
-The configuration demonstrates the correct way to set up Compose with rules_kotlin, with the key insight that **Compose compiler plugin version must match rules_kotlin's Kotlin version** (2.0.0 in this case).
+## The Solution (October 2025)
 
-Future upgrades to Compose BOM 2025.05.01 in Bazel will require either:
-1. Waiting for rules_kotlin to support Kotlin 2.1.x with compatible Compose compiler plugins
-2. Using Bzlmod with rules_kotlin v2.1.9+ (requires migration from WORKSPACE)
+### What Made It Work
+
+The key was using **rules_kotlin v2.1.0** with the **correct Compose plugin configuration**:
+
+```python
+# WORKSPACE
+http_archive(
+    name = "rules_kotlin",
+    sha256 = "dd32f19e73c70f32ccb9a166c615c0ca4aed8e27e72c4a6330c3523eafa1aa55",
+    urls = ["https://github.com/bazelbuild/rules_kotlin/releases/download/v2.1.0/rules_kotlin-v2.1.0.tar.gz"],
+)
+
+maven_install(
+    artifacts = [
+        # Kotlin 2.1.0 to match rules_kotlin v2.1.0
+        "org.jetbrains.kotlin:kotlin-stdlib:2.1.0",
+
+        # Compose compiler plugin MUST match Kotlin version
+        "org.jetbrains.kotlin:kotlin-compose-compiler-plugin-embeddable:2.1.0",
+
+        # Compose UI 1.8.1 from BOM 2025.05.01
+        "androidx.compose.ui:ui:1.8.1",
+        "androidx.compose.ui:ui-android:1.8.1",
+        # ... other compose dependencies at 1.8.1
+
+        # Material3 1.3.2 from BOM 2025.05.01
+        "androidx.compose.material3:material3:1.3.2",
+
+        # Material Icons 1.7.8 (NOT 1.8.1!) from BOM 2025.05.01
+        "androidx.compose.material:material-icons-extended:1.7.8",
+    ],
+)
+```
+
+```python
+# BUILD.bazel (root)
+kt_compiler_plugin(
+    name = "compose_plugin",
+    id = "androidx.compose.compiler.plugins.kotlin",
+    options = {
+        "sourceInformation": "true",
+    },
+    target_embedded_compiler = True,
+    visibility = ["//visibility:public"],
+    deps = [
+        "@maven//:org_jetbrains_kotlin_kotlin_compose_compiler_plugin_embeddable",
+    ],
+)
+```
+
+### Critical Insights
+
+1. **rules_kotlin v2.1.0 supports Kotlin 2.1.x** - This was released Dec 2023 specifically for Kotlin 2.1.x support
+2. **Compose compiler version MUST match Kotlin compiler version** - Kotlin 2.1.0 → Compose compiler 2.1.0
+3. **We tried v2.1.0 before, but with wrong plugin config** - The retry with correct config was the key
+4. **Material Icons version is 1.7.8** for BOM 2025.05.01, not 1.8.1 (verified from official BOM mapping)
+5. **The correct plugin configuration** was discovered from the official Jetpack Compose example:
+   - Plugin ID: `androidx.compose.compiler.plugins.kotlin`
+   - Artifact: `kotlin-compose-compiler-plugin-embeddable`
+   - Plugin defined in root BUILD.bazel
+
+### KAPT Warning (Benign)
+
+The build shows this warning but still succeeds:
+```
+warning: support for language version 2.0+ in kapt is in Alpha and must be enabled explicitly. Falling back to 1.9.
+```
+
+KAPT (used by Hilt) falls back to Kotlin 1.9 language version, but the build completes successfully with Hilt annotation processing working correctly.
+
+### Version Compatibility Matrix
+
+| rules_kotlin | Kotlin | Compose Compiler | Compose UI | Status |
+|--------------|--------|------------------|------------|--------|
+| v1.9.5 | 1.9.x | 2.1.20 | 1.7.6 | ❌ NoSuchMethodError with Hilt |
+| v2.0.0 | 2.0.x | 2.0.0 | 1.7.6 | ✅ Works |
+| v2.0.0 | 2.0.x | 2.1.20 | 1.8.1 | ❌ NoSuchMethodError |
+| v2.1.0 | 2.1.x | 2.1.0 | 1.8.1 | ✅ **Works!** |
+
+### No Migration Needed
+
+- **No Bzlmod migration required** - rules_kotlin v2.1.0 works with WORKSPACE
+- **No version divergence** - Both build systems use identical Compose versions
+- **Hilt compatibility** - Works with KAPT annotation processing
