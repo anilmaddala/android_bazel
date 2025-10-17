@@ -1,6 +1,9 @@
 # Common flags for all commands
 common --enable_platform_specific_config
 
+# Use WORKSPACE instead of Bzlmod for dependency management
+common --noenable_bzlmod
+
 # Android configuration
 build:android --fat_apk_cpu=arm64-v8a,armeabi-v7a
 build:android --android_crosstool_top=@androidndk//:toolchain
