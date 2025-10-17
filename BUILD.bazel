@@ -1,0 +1,4 @@
+# Root BUILD file for NoteKeeper
+
+# Make this a package
+exports_files(["WORKSPACE"])

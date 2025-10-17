@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NoteKeeper</string>
+    <string name="add_note">Add Note</string>
+    <string name="note_title">Title</string>
+    <string name="note_content">Content</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="no_notes">No notes yet</string>
+    <string name="add_your_first_note">Add your first note by tapping the + button</string>
+</resources>
