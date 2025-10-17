@@ -1,4 +1,27 @@
 # Root BUILD file for NoteKeeper
 
+load("@rules_kotlin//kotlin:core.bzl", "kt_compiler_plugin")
+
 # Make this a package
 exports_files(["WORKSPACE"])
+
+# Compose stability configuration
+filegroup(
+    name = "stability_config",
+    srcs = ["stability.conf"],
+    visibility = ["//visibility:public"],
+)
+
+# Compose Compiler Plugin for Kotlin 2.0.0
+kt_compiler_plugin(
+    name = "compose_plugin",
+    id = "androidx.compose.compiler.plugins.kotlin",
+    options = {
+        "sourceInformation": "true",
+    },
+    target_embedded_compiler = True,
+    visibility = ["//visibility:public"],
+    deps = [
+        "@maven//:org_jetbrains_kotlin_kotlin_compose_compiler_plugin_embeddable",
+    ],
+)

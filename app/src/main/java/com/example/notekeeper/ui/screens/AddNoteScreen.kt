@@ -28,7 +28,12 @@ fun AddNoteScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
         }
     ) { padding ->
@@ -55,7 +60,7 @@ fun AddNoteScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                maxLines = 10
+                minLines = 5
             )
 
             Spacer(modifier = Modifier.height(16.dp))
