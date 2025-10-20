@@ -3,5 +3,5 @@ package com.example.notekeeper
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
-@HiltAndroidApp
-class NoteKeeperApplication : Application()
+@HiltAndroidApp(Application::class)
+class NoteKeeperApplication : Hilt_NoteKeeperApplication()

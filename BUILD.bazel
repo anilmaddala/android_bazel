@@ -1,27 +1,33 @@
 # Root BUILD file for NoteKeeper
 
-load("@rules_kotlin//kotlin:core.bzl", "kt_compiler_plugin")
+load("@io_bazel_rules_kotlin//kotlin:core.bzl", "define_kt_toolchain", "kt_compiler_plugin")
+load("@rules_jvm_external//:defs.bzl", "artifact")
+
+# Kotlin toolchain configuration
+KOTLIN_VERSION = "1.8"
+JAVA_VERSION = "11"
+
+define_kt_toolchain(
+    name = "kotlin_toolchain",
+    api_version = KOTLIN_VERSION,
+    jvm_target = JAVA_VERSION,
+    language_version = KOTLIN_VERSION,
+)
 
 # Make this a package
 exports_files(["WORKSPACE"])
 
-# Compose stability configuration
-filegroup(
-    name = "stability_config",
-    srcs = ["stability.conf"],
-    visibility = ["//visibility:public"],
-)
+# Setup Hilt Android rules
+load("@dagger//:workspace_defs.bzl", "hilt_android_rules")
+hilt_android_rules()
 
-# Compose Compiler Plugin for Kotlin 2.0.0
+# Compose Compiler Plugin for Kotlin 1.8.21
 kt_compiler_plugin(
     name = "compose_plugin",
-    id = "androidx.compose.compiler.plugins.kotlin",
-    options = {
-        "sourceInformation": "true",
-    },
+    id = "androidx.compose.compiler",
     target_embedded_compiler = True,
     visibility = ["//visibility:public"],
     deps = [
-        "@maven//:org_jetbrains_kotlin_kotlin_compose_compiler_plugin_embeddable",
+        artifact("androidx.compose.compiler:compiler"),
     ],
 )

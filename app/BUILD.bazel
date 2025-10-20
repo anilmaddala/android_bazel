@@ -1,17 +1,5 @@
-load("@rules_kotlin//kotlin:android.bzl", "kt_android_library")
+load("@io_bazel_rules_kotlin//kotlin:android.bzl", "kt_android_library")
 load("@build_bazel_rules_android//android:rules.bzl", "android_binary", "android_library")
-
-# Hilt annotation processor plugin
-java_plugin(
-    name = "hilt_plugin",
-    generates_api = True,
-    processor_class = "dagger.hilt.processor.internal.root.RootProcessor",
-    deps = [
-        "@maven//:com_google_dagger_hilt_android_compiler",
-        "@maven//:com_google_dagger_hilt_core",
-        "@maven//:com_google_dagger_dagger_compiler",
-    ],
-)
 
 # Kotlin Android Library for the app sources with Hilt
 kt_android_library(
@@ -23,10 +11,10 @@ kt_android_library(
     manifest = "src/main/AndroidManifest.xml",
     resource_files = glob(["src/main/res/**"]),
     plugins = [
-        ":hilt_plugin",
         "//:compose_plugin",
     ],
     deps = [
+        "//:hilt-android",
         "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
         "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
         "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_android",
@@ -42,7 +30,7 @@ kt_android_library(
         "@maven//:androidx_lifecycle_lifecycle_viewmodel_compose",
         "@maven//:androidx_activity_activity_compose",
         "@maven//:androidx_navigation_navigation_compose",
-        "@maven//:com_google_dagger_hilt_android",
+        "@maven//:androidx_hilt_hilt_navigation_compose",
         "@maven//:javax_inject_javax_inject",
     ],
     visibility = ["//visibility:private"],
