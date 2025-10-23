@@ -15,8 +15,8 @@ import com.example.notekeeper.ui.navigation.NavGraph
 import com.example.notekeeper.ui.theme.NoteKeeperTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint(ComponentActivity::class)
-class MainActivity : Hilt_MainActivity() {
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
     private val viewModel: NoteViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {

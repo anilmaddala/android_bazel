@@ -41,52 +41,27 @@ android_sdk_repository(
     build_tools_version = "34.0.0",
 )
 
-# Kotlin rules - Using v1.8.1 for compatibility with Dagger fork
-RULES_KOTLIN_VERSION = "1.8.1"
+# Kotlin rules - Using v2.1.9 with Kotlin 2.1.0 and KSP support
+RULES_KOTLIN_VERSION = "2.1.9"
+KOTLIN_VERSION = "2.1.0"
+KSP_VERSION = "2.1.0-1.0.31"
 
 http_archive(
-    name = "io_bazel_rules_kotlin",
-    sha256 = "a630cda9fdb4f56cf2dc20a4bf873765c41cf00e9379e8d59cd07b24730f4fde",
-    urls = ["https://github.com/bazelbuild/rules_kotlin/releases/download/v%s/rules_kotlin_release.tgz" % RULES_KOTLIN_VERSION],
+    name = "rules_kotlin",
+    sha256 = "21b2b350f4856000bd7e3eb55befe37219b237fb37cc3ba272588c7eee4b4cea",
+    urls = ["https://github.com/bazelbuild/rules_kotlin/releases/download/v%s/rules_kotlin-v%s.tar.gz" % (RULES_KOTLIN_VERSION, RULES_KOTLIN_VERSION)],
 )
 
-load(
-    "@io_bazel_rules_kotlin//kotlin:repositories.bzl",
-    "kotlin_repositories",
-    "kotlinc_version",
-)
+load("@rules_kotlin//kotlin:repositories.bzl", "kotlin_repositories")
 
-kotlin_repositories(compiler_release = kotlinc_version(
-    release = "1.8.21",
-    sha256 = "6e43c5569ad067492d04d92c28cdf8095673699d81ce460bd7270443297e8fd7",
-))
+kotlin_repositories()
 
-register_toolchains("//:kotlin_toolchain")
+load("@rules_kotlin//kotlin:core.bzl", "kt_register_toolchains")
 
-# Dagger and Hilt - Using custom fork for Bazel component generation
-DAGGER_SHA = "a796141af307e2b3a48b64a81ee163d96ffbfb41a71f0ea9cf8d26f930c80ca6"
+kt_register_toolchains()
 
-http_archive(
-    name = "dagger",
-    sha256 = DAGGER_SHA,
-    strip_prefix = "dagger-use-generated-class-instead-of-superclass",
-    urls = ["https://github.com/pswaminathan/dagger/archive/refs/heads/use-generated-class-instead-of-superclass.zip"],
-)
-
-load("@dagger//:repositories.bzl", "dagger_repositories")
-dagger_repositories()
-
-load("@dagger//:workspace_defs.bzl", "dagger_workspace")
-dagger_workspace()
-
-load("@dagger//:workspace_defs_2.bzl", "dagger_workspace_2")
-dagger_workspace_2()
-
-load(
-    "@dagger//:workspace_defs.bzl",
-    "HILT_ANDROID_ARTIFACTS",
-    "HILT_ANDROID_REPOSITORIES",
-)
+# Dagger version - Official release with KSP support
+DAGGER_VERSION = "2.57"
 
 # Maven dependencies
 http_archive(
@@ -106,12 +81,12 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 
 maven_install(
     artifacts = [
-        # Kotlin stdlib - 1.8.21 (matching rules_kotlin 1.8.1)
-        "org.jetbrains.kotlin:kotlin-stdlib:1.8.21",
-        "org.jetbrains.kotlin:kotlin-stdlib-common:1.8.21",
+        # Kotlin stdlib - 2.1.0 (matching rules_kotlin 2.1.9)
+        "org.jetbrains.kotlin:kotlin-stdlib:2.1.0",
+        "org.jetbrains.kotlin:kotlin-stdlib-common:2.1.0",
 
-        # Compose Compiler - 1.4.7 compatible with Kotlin 1.8.21
-        "androidx.compose.compiler:compiler:1.4.7",
+        # Compose Compiler - Built into Kotlin 2.0+, using Compose BOM for libraries
+        # Note: Compose Compiler is now part of the Kotlin compiler in 2.0+
 
         # Kotlinx Coroutines
         "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3",
@@ -141,26 +116,26 @@ maven_install(
         "androidx.savedstate:savedstate:1.2.1",
         "androidx.savedstate:savedstate-ktx:1.2.1",
 
-        # Jetpack Compose - 1.4.3 compatible with Kotlin 1.8.21
-        "androidx.compose.runtime:runtime:1.4.3",
-        "androidx.compose.runtime:runtime-saveable:1.4.3",
-        "androidx.compose.ui:ui:1.4.3",
-        "androidx.compose.ui:ui-geometry:1.4.3",
-        "androidx.compose.ui:ui-graphics:1.4.3",
-        "androidx.compose.ui:ui-text:1.4.3",
-        "androidx.compose.ui:ui-unit:1.4.3",
-        "androidx.compose.ui:ui-util:1.4.3",
-        "androidx.compose.ui:ui-tooling-preview:1.4.3",
-        "androidx.compose.foundation:foundation:1.4.3",
-        "androidx.compose.foundation:foundation-layout:1.4.3",
-        "androidx.compose.animation:animation:1.4.3",
-        "androidx.compose.animation:animation-core:1.4.3",
+        # Jetpack Compose - 1.7.5 compatible with Kotlin 2.1.0
+        "androidx.compose.runtime:runtime:1.7.5",
+        "androidx.compose.runtime:runtime-saveable:1.7.5",
+        "androidx.compose.ui:ui:1.7.5",
+        "androidx.compose.ui:ui-geometry:1.7.5",
+        "androidx.compose.ui:ui-graphics:1.7.5",
+        "androidx.compose.ui:ui-text:1.7.5",
+        "androidx.compose.ui:ui-unit:1.7.5",
+        "androidx.compose.ui:ui-util:1.7.5",
+        "androidx.compose.ui:ui-tooling-preview:1.7.5",
+        "androidx.compose.foundation:foundation:1.7.5",
+        "androidx.compose.foundation:foundation-layout:1.7.5",
+        "androidx.compose.animation:animation:1.7.5",
+        "androidx.compose.animation:animation-core:1.7.5",
 
-        # Material 3 - 1.1.1
-        "androidx.compose.material3:material3:1.1.1",
+        # Material 3 - 1.3.1
+        "androidx.compose.material3:material3:1.3.1",
         # Material Icons
-        "androidx.compose.material:material-icons-core:1.4.3",
-        "androidx.compose.material:material-icons-extended:1.4.3",
+        "androidx.compose.material:material-icons-core:1.7.5",
+        "androidx.compose.material:material-icons-extended:1.7.5",
 
         # Compose ViewModel integration - 2.6.1
         "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1",
@@ -173,8 +148,18 @@ maven_install(
         "androidx.navigation:navigation-runtime-ktx:2.6.0",
         "androidx.navigation:navigation-compose:2.6.0",
 
-        # Hilt Navigation for Compose - 1.0.0
-        "androidx.hilt:hilt-navigation-compose:1.0.0",
+        # Hilt Navigation for Compose - 1.2.0
+        "androidx.hilt:hilt-navigation-compose:1.2.0",
+
+        # Dagger and Hilt - Official version with KSP support
+        "com.google.dagger:dagger:2.57",
+        "com.google.dagger:dagger-compiler:2.57",
+        "com.google.dagger:hilt-android:2.57",
+        "com.google.dagger:hilt-compiler:2.57",
+        "com.google.dagger:hilt-android-compiler:2.57",
+
+        # KSP for Kotlin 2.1.0
+        "com.google.devtools.ksp:symbol-processing-api:2.1.0-1.0.31",
 
         # Javax Inject (required by Hilt)
         "javax.inject:javax.inject:1",
@@ -194,12 +179,12 @@ maven_install(
         "androidx.emoji2:emoji2-views-helper:1.4.0",
         "androidx.arch.core:core-common:2.2.0",
         "androidx.arch.core:core-runtime:2.2.0",
-    ] + HILT_ANDROID_ARTIFACTS,
+    ],
     fail_on_missing_checksum = False,
     repositories = [
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
-    ] + HILT_ANDROID_REPOSITORIES,
+    ],
     strict_visibility = False,
     version_conflict_policy = "pinned",
 )

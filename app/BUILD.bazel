@@ -1,4 +1,4 @@
-load("@io_bazel_rules_kotlin//kotlin:android.bzl", "kt_android_library")
+load("@rules_kotlin//kotlin:android.bzl", "kt_android_library")
 load("@build_bazel_rules_android//android:rules.bzl", "android_binary", "android_library")
 
 # Kotlin Android Library for the app sources with Hilt
@@ -12,9 +12,12 @@ kt_android_library(
     resource_files = glob(["src/main/res/**"]),
     plugins = [
         "//:compose_plugin",
+        "//:hilt_android_ksp",
+        "//:dagger_ksp",
     ],
     deps = [
-        "//:hilt-android",
+        "@maven//:com_google_dagger_hilt_android",
+        "@maven//:com_google_dagger_dagger",
         "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
         "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
         "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_android",

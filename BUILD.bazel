@@ -1,33 +1,38 @@
 # Root BUILD file for NoteKeeper
 
-load("@io_bazel_rules_kotlin//kotlin:core.bzl", "define_kt_toolchain", "kt_compiler_plugin")
+load("@rules_kotlin//kotlin:core.bzl", "kt_compiler_plugin", "kt_ksp_plugin")
 load("@rules_jvm_external//:defs.bzl", "artifact")
-
-# Kotlin toolchain configuration
-KOTLIN_VERSION = "1.8"
-JAVA_VERSION = "11"
-
-define_kt_toolchain(
-    name = "kotlin_toolchain",
-    api_version = KOTLIN_VERSION,
-    jvm_target = JAVA_VERSION,
-    language_version = KOTLIN_VERSION,
-)
 
 # Make this a package
 exports_files(["WORKSPACE"])
 
-# Setup Hilt Android rules
-load("@dagger//:workspace_defs.bzl", "hilt_android_rules")
-hilt_android_rules()
-
-# Compose Compiler Plugin for Kotlin 1.8.21
+# Compose Compiler Plugin for Kotlin 2.1.0
+# Note: In Kotlin 2.0+, Compose compiler is built-in, but we still configure it
 kt_compiler_plugin(
     name = "compose_plugin",
-    id = "androidx.compose.compiler",
-    target_embedded_compiler = True,
+    id = "org.jetbrains.kotlin.plugin.compose",
+    visibility = ["//visibility:public"],
+)
+
+# KSP Plugin for Hilt/Dagger
+kt_ksp_plugin(
+    name = "hilt_android_ksp",
+    processor_class = "dagger.hilt.processor.internal.root.RootProcessor",
+    generates_java = True,
     visibility = ["//visibility:public"],
     deps = [
-        artifact("androidx.compose.compiler:compiler"),
+        artifact("com.google.dagger:hilt-compiler"),
+        artifact("com.google.dagger:hilt-android-compiler"),
+    ],
+)
+
+# KSP Plugin for Dagger
+kt_ksp_plugin(
+    name = "dagger_ksp",
+    processor_class = "dagger.internal.codegen.KspComponentProcessor",
+    generates_java = True,
+    visibility = ["//visibility:public"],
+    deps = [
+        artifact("com.google.dagger:dagger-compiler"),
     ],
 )
