@@ -1,4 +1,5 @@
 load("@rules_kotlin//kotlin:android.bzl", "kt_android_library")
+load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_test", "kt_jvm_library")
 load("@build_bazel_rules_android//android:rules.bzl", "android_binary", "android_library")
 
 # Kotlin Android Library for the app sources with Hilt
@@ -68,4 +69,63 @@ android_binary(
     },
     deps = [":notekeeper_lib"],
     visibility = ["//visibility:public"],
+)
+
+# Test library with app sources (without Android/Compose dependencies)
+# This allows tests to use the business logic without needing Android framework
+kt_jvm_library(
+    name = "test_sources",
+    srcs = [
+        "src/main/java/com/example/notekeeper/data/model/Note.kt",
+        "src/main/java/com/example/notekeeper/data/repository/NoteRepository.kt",
+        "src/main/java/com/example/notekeeper/data/repository/NoteRepositoryImpl.kt",
+        "src/main/java/com/example/notekeeper/ui/NoteViewModel.kt",
+    ],
+    deps = [
+        "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
+        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+        "@maven//:javax_inject_javax_inject",
+        "@maven//:androidx_lifecycle_lifecycle_viewmodel",
+    ],
+)
+
+# Test targets
+kt_jvm_test(
+    name = "NoteRepositoryImplTest",
+    srcs = ["src/test/java/com/example/notekeeper/data/repository/NoteRepositoryImplTest.kt"],
+    test_class = "com.example.notekeeper.data.repository.NoteRepositoryImplTest",
+    deps = [
+        ":test_sources",
+        "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
+        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_test",
+        "@maven//:junit_junit",
+        "@maven//:org_jetbrains_kotlin_kotlin_test",
+        "@maven//:org_jetbrains_kotlin_kotlin_test_junit",
+    ],
+)
+
+kt_jvm_test(
+    name = "NoteViewModelTest",
+    srcs = ["src/test/java/com/example/notekeeper/ui/NoteViewModelTest.kt"],
+    test_class = "com.example.notekeeper.ui.NoteViewModelTest",
+    deps = [
+        ":test_sources",
+        "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
+        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_test",
+        "@maven//:junit_junit",
+        "@maven//:org_jetbrains_kotlin_kotlin_test",
+        "@maven//:org_jetbrains_kotlin_kotlin_test_junit",
+        "@maven//:androidx_lifecycle_lifecycle_viewmodel",
+    ],
+)
+
+# Test suite to run all tests
+test_suite(
+    name = "all_tests",
+    tests = [
+        ":NoteRepositoryImplTest",
+        ":NoteViewModelTest",
+    ],
 )
