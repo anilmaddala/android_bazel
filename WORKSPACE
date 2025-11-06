@@ -3,9 +3,9 @@ workspace(name = "notekeeper")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Java
-RULES_JAVA_VERSION = "6.5.0"
+RULES_JAVA_VERSION = "7.12.2"
 
-RULES_JAVA_SHA = "160d1ebf33763124766fb35316329d907ca67f733238aa47624a8e3ff3cf2ef4"
+RULES_JAVA_SHA = "4018e5fc0dcfc0f6d61e8e2ab869d851c93f89e229e27a8c3bb707d0c0911fa8"
 
 http_archive(
     name = "rules_java",

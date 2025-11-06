@@ -12,4 +12,4 @@ build --define=android_incremental_dexing_tool=d8_dexbuilder
 build --define=android_standalone_dexing_tool=d8_compat_dx
 
 # KSP is not thread-safe yet, limit multiplex workers
-build --experimental_worker_max_multiplex_instances=KotlinKsp=1
+build --worker_max_multiplex_instances=KotlinKsp=1
