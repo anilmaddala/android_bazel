@@ -1,6 +1,10 @@
 # Bazel Migration Guide for NoteKeeper
 
-## Current Status
+> **NOTE**: This document contains historical migration information.
+> The project has been successfully migrated to use **KSP with official Dagger 2.57**.
+> For current setup and configuration, see [README.md](README.md).
+
+## Historical Migration Status
 
 ### Gradle Build ✅
 The app successfully builds with Gradle using:

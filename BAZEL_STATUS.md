@@ -1,6 +1,10 @@
 # Bazel Build Status
 
-## Current State
+> **NOTE**: This document contains historical information from earlier migration attempts.
+> The project has since been successfully migrated to **KSP with official Dagger 2.57**.
+> For current build instructions and configuration, see [README.md](README.md).
+
+## Historical State (Pre-KSP Migration)
 
 ### Gradle Build ✅
 The Gradle build is **fully functional** with the latest dependencies:

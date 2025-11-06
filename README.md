@@ -14,11 +14,11 @@ A modern Android note-taking application built with Jetpack Compose and Hilt for
 
 ## Tech Stack
 
-- **UI**: Jetpack Compose 1.4.3 (Material 3)
-- **Dependency Injection**: Hilt with custom Dagger fork (KAPT)
+- **UI**: Jetpack Compose 1.7.5 (Material 3)
+- **Dependency Injection**: Hilt with official Dagger 2.57 (KSP)
 - **Architecture**: MVVM (Model-View-ViewModel)
 - **Navigation**: Jetpack Navigation Compose
-- **Language**: Kotlin 1.8.21
+- **Language**: Kotlin 2.1.0
 - **Build System**: Bazel 7.6.1
 
 ## Project Structure
@@ -109,31 +109,31 @@ bazel clean --expunge
 
 ### Build Rules
 
-- **rules_kotlin**: 1.8.1
+- **rules_kotlin**: 2.1.9
 - **rules_android**: 0.1.1
 - **rules_java**: 6.5.0 (required for JDK 17 toolchain)
 - **rules_jvm_external**: 4.5
 
 ### Language & Compiler
 
-- **Kotlin**: 1.8.21
-- **Kotlin Compiler**: kotlinc 1.8.21
+- **Kotlin**: 2.1.0
+- **Kotlin Compiler**: kotlinc 2.1.0
+- **KSP**: 2.1.0-1.0.31
 - **JVM Target**: Java 11
 - **JDK**: 17 (via rules_java toolchains)
 
 ### Jetpack Compose
 
-- **Compose UI**: 1.4.3
-- **Compose Compiler**: 1.4.7 (compatible with Kotlin 1.8.21)
-- **Material3**: 1.1.1
-- **Material Icons**: 1.4.3
+- **Compose UI**: 1.7.5
+- **Compose Compiler**: Built into Kotlin 2.1.0
+- **Material3**: 1.3.1
+- **Material Icons**: 1.7.5
 
 ### Dependency Injection
 
-- **Custom Dagger Fork**: pswaminathan/dagger
-  - Branch: `use-generated-class-instead-of-superclass`
-  - Generates `Hilt_*` classes for Bazel compatibility
-  - Requires special annotation syntax (see below)
+- **Dagger**: Official version 2.57 with KSP support
+- **Hilt**: Official version 2.57 with KSP support
+- **Annotation Processing**: KSP (replacing KAPT)
 
 ## Dependencies
 
@@ -144,19 +144,22 @@ bazel clean --expunge
 - androidx.annotation:annotation:1.7.1
 
 ### Jetpack Compose
-- androidx.compose.ui:ui:1.4.3
-- androidx.compose.ui:ui-graphics:1.4.3
-- androidx.compose.ui:ui-tooling-preview:1.4.3
-- androidx.compose.material3:material3:1.1.1
-- androidx.compose.material:material-icons-core:1.4.3
-- androidx.compose.material:material-icons-extended:1.4.3
-- androidx.compose.foundation:foundation:1.4.3
-- androidx.compose.runtime:runtime:1.4.3
-- androidx.compose.compiler:compiler:1.4.7
+- androidx.compose.ui:ui:1.7.5
+- androidx.compose.ui:ui-graphics:1.7.5
+- androidx.compose.ui:ui-tooling-preview:1.7.5
+- androidx.compose.material3:material3:1.3.1
+- androidx.compose.material:material-icons-core:1.7.5
+- androidx.compose.material:material-icons-extended:1.7.5
+- androidx.compose.foundation:foundation:1.7.5
+- androidx.compose.runtime:runtime:1.7.5
 
 ### Hilt (Dependency Injection)
-- Custom Dagger fork (via http_archive)
-- androidx.hilt:hilt-navigation-compose:1.0.0
+- com.google.dagger:dagger:2.57
+- com.google.dagger:dagger-compiler:2.57
+- com.google.dagger:hilt-android:2.57
+- com.google.dagger:hilt-compiler:2.57
+- com.google.dagger:hilt-android-compiler:2.57
+- androidx.hilt:hilt-navigation-compose:1.2.0
 - javax.inject:javax.inject:1
 - javax.annotation:javax.annotation-api:1.3.2
 
@@ -231,10 +234,10 @@ Locks the Bazel version:
 #### WORKSPACE
 Defines external dependencies and build rules in this order:
 
-1. **rules_java 6.5.0**: Sets up JDK 17 toolchain (critical for Dagger fork compatibility)
+1. **rules_java 6.5.0**: Sets up JDK 17 toolchain
 2. **rules_android 0.1.1**: Android build rules
-3. **rules_kotlin 1.8.1**: Kotlin build rules with Kotlin 1.8.21
-4. **Custom Dagger fork**: pswaminathan/dagger (use-generated-class-instead-of-superclass branch)
+3. **rules_kotlin 2.1.9**: Kotlin build rules with Kotlin 2.1.0 and KSP 2.1.0-1.0.31
+4. **Official Dagger 2.57**: With KSP annotation processing support
 5. **rules_jvm_external 4.5**: Maven dependency management
 6. **Android SDK**: API level 34
 
@@ -251,60 +254,73 @@ load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_jav
 rules_java_dependencies()
 rules_java_toolchains()  # Sets up JDK 17
 
-# Kotlin 1.8.21
-RULES_KOTLIN_VERSION = "1.8.1"
-kotlin_repositories(compiler_release = kotlinc_version(
-    release = "1.8.21",
-    sha256 = "6e43c5569ad067492d04d92c28cdf8095673699d81ce460bd7270443297e8fd7",
-))
+# Kotlin 2.1.0 with KSP support
+RULES_KOTLIN_VERSION = "2.1.9"
+KOTLIN_VERSION = "2.1.0"
+KSP_VERSION = "2.1.0-1.0.31"
 
-# Custom Dagger fork
 http_archive(
-    name = "dagger",
-    sha256 = "a796141af307e2b3a48b64a81ee163d96ffbfb41a71f0ea9cf8d26f930c80ca6",
-    strip_prefix = "dagger-use-generated-class-instead-of-superclass",
-    urls = ["https://github.com/pswaminathan/dagger/archive/refs/heads/use-generated-class-instead-of-superclass.zip"],
+    name = "rules_kotlin",
+    sha256 = "21b2b350f4856000bd7e3eb55befe37219b237fb37cc3ba272588c7eee4b4cea",
+    urls = ["https://github.com/bazelbuild/rules_kotlin/releases/download/v%s/rules_kotlin-v%s.tar.gz" % (RULES_KOTLIN_VERSION, RULES_KOTLIN_VERSION)],
 )
 
-# Compose 1.4.3 compatible with Kotlin 1.8.21
-"androidx.compose.compiler:compiler:1.4.7"
-"androidx.compose.ui:ui:1.4.3"
-"androidx.compose.material3:material3:1.1.1"
+load("@rules_kotlin//kotlin:repositories.bzl", "kotlin_repositories")
+kotlin_repositories()
+
+# Official Dagger 2.57 with KSP support
+DAGGER_VERSION = "2.57"
+
+# Compose 1.7.5 compatible with Kotlin 2.1.0
+"androidx.compose.ui:ui:1.7.5"
+"androidx.compose.material3:material3:1.3.1"
+"com.google.dagger:dagger:2.57"
+"com.google.dagger:hilt-android:2.57"
+"com.google.dagger:hilt-compiler:2.57"
+"com.google.devtools.ksp:symbol-processing-api:2.1.0-1.0.31"
 ```
 
 #### BUILD.bazel (root)
-Defines the Kotlin toolchain and Compose compiler plugin:
+Defines the Compose compiler plugin and KSP plugins for Hilt/Dagger:
 ```python
-load("@io_bazel_rules_kotlin//kotlin:core.bzl", "define_kt_toolchain", "kt_compiler_plugin")
+load("@rules_kotlin//kotlin:core.bzl", "kt_compiler_plugin", "kt_ksp_plugin")
+load("@rules_jvm_external//:defs.bzl", "artifact")
 
-# Kotlin toolchain
-define_kt_toolchain(
-    name = "kotlin_toolchain",
-    api_version = "1.8",
-    jvm_target = "11",
-    language_version = "1.8",
-)
-
-# Compose Compiler Plugin for Kotlin 1.8.21
+# Compose Compiler Plugin for Kotlin 2.1.0
 kt_compiler_plugin(
     name = "compose_plugin",
-    id = "androidx.compose.compiler",
-    target_embedded_compiler = True,
+    id = "org.jetbrains.kotlin.plugin.compose",
+    visibility = ["//visibility:public"],
+)
+
+# KSP Plugin for Hilt/Dagger
+kt_ksp_plugin(
+    name = "hilt_android_ksp",
+    processor_class = "dagger.hilt.processor.internal.root.RootProcessor",
+    generates_java = True,
     visibility = ["//visibility:public"],
     deps = [
-        "@maven//:androidx_compose_compiler_compiler",
+        artifact("com.google.dagger:hilt-compiler"),
+        artifact("com.google.dagger:hilt-android-compiler"),
     ],
 )
 
-# Setup Hilt Android rules from custom Dagger fork
-load("@dagger//:workspace_defs.bzl", "hilt_android_rules")
-hilt_android_rules()
+# KSP Plugin for Dagger
+kt_ksp_plugin(
+    name = "dagger_ksp",
+    processor_class = "dagger.internal.codegen.KspComponentProcessor",
+    generates_java = True,
+    visibility = ["//visibility:public"],
+    deps = [
+        artifact("com.google.dagger:dagger-compiler"),
+    ],
+)
 ```
 
 #### app/BUILD.bazel
-Defines the Android app target with:
+Defines the Android app target with KSP plugins:
 ```python
-load("@io_bazel_rules_kotlin//kotlin:android.bzl", "kt_android_library")
+load("@rules_kotlin//kotlin:android.bzl", "kt_android_library")
 load("@build_bazel_rules_android//android:rules.bzl", "android_binary")
 
 kt_android_library(
@@ -314,10 +330,13 @@ kt_android_library(
     manifest = "src/main/AndroidManifest.xml",
     resource_files = glob(["src/main/res/**"]),
     plugins = [
-        "//:compose_plugin",  # Compose compiler
+        "//:compose_plugin",      # Compose compiler
+        "//:hilt_android_ksp",    # Hilt KSP processor
+        "//:dagger_ksp",          # Dagger KSP processor
     ],
     deps = [
-        "//:hilt-android",  # From custom Dagger fork
+        "@maven//:com_google_dagger_hilt_android",
+        "@maven//:com_google_dagger_dagger",
         "@maven//:androidx_hilt_hilt_navigation_compose",
         "@maven//:androidx_compose_ui_ui",
         "@maven//:androidx_compose_material3_material3",
@@ -327,24 +346,23 @@ kt_android_library(
 
 android_binary(
     name = "notekeeper",
+    custom_package = "com.example.notekeeper",
     manifest = "src/main/AndroidManifest.xml",
     deps = [":notekeeper_lib"],
-    debug_key = "debug.keystore",
 )
 ```
 
-### Custom Dagger Fork - Special Hilt Annotation Syntax
+### Standard Hilt Annotations with KSP
 
-The custom Dagger fork requires a different annotation syntax than standard Hilt:
+This project uses the standard official Hilt annotations with KSP annotation processing:
 
 **MainActivity.kt:**
 ```kotlin
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.activity.ComponentActivity
 
-// Custom fork syntax: annotation requires base class parameter
-@AndroidEntryPoint(ComponentActivity::class)
-class MainActivity : Hilt_MainActivity() {  // Extends generated Hilt class
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
     // ...
 }
 ```
@@ -354,22 +372,34 @@ class MainActivity : Hilt_MainActivity() {  // Extends generated Hilt class
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
-// Custom fork syntax: annotation requires base class parameter
-@HiltAndroidApp(Application::class)
-class NoteKeeperApplication : Hilt_NoteKeeperApplication() {  // Extends generated Hilt class
+@HiltAndroidApp
+class NoteKeeperApplication : Application()
+```
+
+**AppModule.kt:**
+```kotlin
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class AppModule {
+    // ...
 }
 ```
 
-The fork generates `Hilt_MainActivity` and `Hilt_NoteKeeperApplication` classes that your classes extend, instead of the standard Hilt approach where annotations modify the superclass.
+KSP (Kotlin Symbol Processing) generates the necessary Hilt component classes automatically during the build process.
 
 ### Critical Insights
 
-1. **JDK 17 Required**: rules_java must be configured first to set up JDK 17 toolchain. JDK 21 will NOT work with the Dagger fork
-2. **Bzlmod Must Be Disabled**: Add `common --noenable_bzlmod` to .bazelrc
-3. **rules_java Order**: rules_java must be loaded BEFORE rules_android and rules_kotlin in WORKSPACE
-4. **Compose Compiler Version**: Must match Kotlin version (1.4.7 for Kotlin 1.8.21)
-5. **Hilt Annotation Syntax**: Custom fork requires base class parameter and extending generated `Hilt_*` classes
-6. **Version Compatibility**: Kotlin 1.8.21 + Compose 1.4.3 + rules_kotlin 1.8.1 must be used together
+1. **KSP Instead of KAPT**: This project uses KSP (Kotlin Symbol Processing) for faster and more efficient annotation processing
+2. **Official Dagger/Hilt**: Uses official Dagger 2.57 with native KSP support (no custom fork needed)
+3. **Bzlmod Must Be Disabled**: Add `common --noenable_bzlmod` to .bazelrc and `build --experimental_worker_max_multiplex_instances=KotlinKsp=1`
+4. **rules_java Order**: rules_java must be loaded BEFORE rules_android and rules_kotlin in WORKSPACE
+5. **Kotlin 2.1.0 Compose Integration**: Compose compiler is built into Kotlin 2.0+, configured via kt_compiler_plugin
+6. **Version Compatibility**: Kotlin 2.1.0 + Compose 1.7.5 + rules_kotlin 2.1.9 + KSP 2.1.0-1.0.31 work together
+7. **KSP Thread Safety**: KSP requires worker limiting configuration in .bazelrc for stable builds
 
 ### Installing Bazelisk
 
@@ -396,9 +426,9 @@ choco install bazelisk
 - **Cause**: JDK 21 being used instead of JDK 17
 - **Solution**: Ensure rules_java is loaded FIRST in WORKSPACE and calls `rules_java_toolchains()`
 
-**Issue**: `Expected @AndroidEntryPoint to have a value`
-- **Cause**: Using standard Hilt annotation syntax with custom Dagger fork
-- **Solution**: Use `@AndroidEntryPoint(ComponentActivity::class)` and extend `Hilt_MainActivity()`
+**Issue**: KSP annotation processing failures
+- **Cause**: KSP worker thread safety issues
+- **Solution**: Add `build --experimental_worker_max_multiplex_instances=KotlinKsp=1` to .bazelrc
 
 **Issue**: Bzlmod conflicts with WORKSPACE configuration
 - **Cause**: Bazel 7.x enables Bzlmod by default
@@ -409,38 +439,41 @@ choco install bazelisk
 - **Solution**: Use `bazel build //app:notekeeper --jobs=4` to limit parallelism
 
 **Issue**: `kt_android_library should be loaded from //kotlin:android.bzl`
-- **Cause**: Using deprecated load path
-- **Note**: This is a warning and can be ignored - build succeeds
+- **Cause**: Using legacy load path (rules_kotlin 2.1.9 uses new path)
+- **Note**: This is a deprecation warning and can be ignored - build succeeds
 
 ## Known Issues
 
-- **JDK Version**: Must use JDK 17, not JDK 21 (Dagger fork uses Java 7/8 targets which are unsupported in JDK 21)
-- **Load Path Warnings**: `kt_android_library should be loaded from //kotlin:android.bzl` warnings are benign
-- **Java 7 Warnings**: Build shows warnings about Java 7/8 being obsolete - these are expected and harmless
+- **JDK Version**: Must use JDK 17, not JDK 21 for compatibility with Bazel's Java toolchain
+- **Load Path Warnings**: `kt_android_library should be loaded from //kotlin:android.bzl` warnings are benign deprecation notices
+- **KSP Worker Limits**: KSP requires single-threaded worker configuration for stable builds (configured in .bazelrc)
 
 ## Build Verification
 
 The app successfully builds and runs with:
-- Generated Hilt components: `Hilt_MainActivity`, `Hilt_NoteKeeperApplication`
+- KSP-generated Hilt components using official Dagger 2.57
 - Full Jetpack Compose UI with Material 3
-- Dependency injection working correctly
+- Dependency injection working correctly with standard Hilt annotations
 - Navigation between screens functional
+- Kotlin 2.1.0 with Compose 1.7.5 fully operational
 
 Build output confirms:
 ```
-entry point element: com.example.notekeeper.MainActivity actually extends: Hilt_MainActivity
-entry point element: com.example.notekeeper.NoteKeeperApplication actually extends: Hilt_NoteKeeperApplication
 INFO: Build completed successfully
+Target //app:notekeeper up-to-date:
+  bazel-bin/app/notekeeper.apk
 ```
 
 ## Additional Resources
 
-- [Custom Dagger Fork](https://github.com/pswaminathan/dagger/tree/use-generated-class-instead-of-superclass) - Fork used for Bazel Hilt support
-- [rules_kotlin 1.8.1](https://github.com/bazelbuild/rules_kotlin/releases/tag/v1.8.1) - Kotlin build rules
+- [Dagger 2.57 Release](https://github.com/google/dagger/releases/tag/dagger-2.57) - Official Dagger release with KSP support
+- [KSP Documentation](https://kotlinlang.org/docs/ksp-overview.html) - Kotlin Symbol Processing guide
+- [rules_kotlin 2.1.9](https://github.com/bazelbuild/rules_kotlin/releases/tag/v2.1.9) - Kotlin build rules with KSP support
 - [rules_android 0.1.1](https://github.com/bazelbuild/rules_android) - Android build rules
 - [rules_java 6.5.0](https://github.com/bazelbuild/rules_java) - Java toolchain rules
 - [Jetpack Compose](https://developer.android.com/jetpack/compose) - Official Compose documentation
+- [Hilt Android](https://developer.android.com/training/dependency-injection/hilt-android) - Official Hilt documentation
 
 ## License
 
-This is a sample project demonstrating Bazel build system support for Android apps with Jetpack Compose and Hilt using a custom Dagger fork.
+This is a sample project demonstrating Bazel build system support for Android apps with Jetpack Compose and Hilt using official Dagger 2.57 with KSP annotation processing.
