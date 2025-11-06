@@ -5,7 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Java
 RULES_JAVA_VERSION = "7.12.2"
 
-RULES_JAVA_SHA = "4018e5fc0dcfc0f6d61e8e2ab869d851c93f89e229e27a8c3bb707d0c0911fa8"
+RULES_JAVA_SHA = "a9690bc00c538246880d5c83c233e4deb83fe885f54c21bb445eb8116a180b83"
 
 http_archive(
     name = "rules_java",
