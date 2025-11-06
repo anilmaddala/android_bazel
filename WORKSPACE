@@ -92,6 +92,7 @@ maven_install(
         "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3",
         "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3",
         "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3",
+        "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3",
 
         # AndroidX Core
         "androidx.annotation:annotation:1.7.1",
@@ -179,6 +180,19 @@ maven_install(
         "androidx.emoji2:emoji2-views-helper:1.4.0",
         "androidx.arch.core:core-common:2.2.0",
         "androidx.arch.core:core-runtime:2.2.0",
+
+        # Testing dependencies
+        "junit:junit:4.13.2",
+        "org.jetbrains.kotlin:kotlin-test:2.1.0",
+        "org.jetbrains.kotlin:kotlin-test-junit:2.1.0",
+        "org.mockito:mockito-core:5.8.0",
+        "org.mockito.kotlin:mockito-kotlin:5.2.1",
+        "androidx.test:core:1.5.0",
+        "androidx.test:core-ktx:1.5.0",
+        "androidx.test:runner:1.5.2",
+        "androidx.test:rules:1.5.0",
+        "androidx.test.ext:junit:1.1.5",
+        "androidx.test.ext:junit-ktx:1.1.5",
     ],
     fail_on_missing_checksum = False,
     repositories = [
